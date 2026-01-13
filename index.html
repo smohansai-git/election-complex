@@ -3,215 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Election System 2026</title>
+    <title>Election System 2026 - Unified Portal</title>
     <style>
-        :root { --primary: #e94560; --bg: #1a1a2e; --card: #16213e; --text: #ffffff; --success: #27ae60; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
-        nav { background: #0f3460; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--primary); }
-        .nav-btn { background: none; border: 1px solid var(--primary); color: white; padding: 10px 20px; margin: 0 5px; cursor: pointer; border-radius: 5px; }
-        .nav-btn.active { background: var(--primary); }
-        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        .card { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid #0f3460; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
-        button { padding: 12px 20px; border: none; color: white; cursor: pointer; border-radius: 8px; font-weight: bold; text-transform: uppercase; margin: 5px 0; width: 100%; }
-        .btn-blue { background: #3498db; }
+        :root { 
+            --primary: #e94560; 
+            --bg: #1a1a2e; 
+            --card: #16213e; 
+            --text: #ffffff; 
+            --accent: #f1c40f;
+            --success: #27ae60;
+            --voter-blue: #1e3c72;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* NAVIGATION BAR */
+        nav {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+        }
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 8px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--primary);
+        }
+
+        /* LAYOUT CONTAINERS */
+        .page-content { display: none; padding: 40px 20px; }
+        .page-content.active { display: block; }
+        .container { max-width: 900px; margin: auto; }
+
+        /* SHARED CARD STYLING */
+        .card { 
+            background: var(--card); 
+            padding: 35px; 
+            border-radius: 20px; 
+            border: 1px solid #0f3460; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            text-align: center;
+            max-width: 450px;
+            margin: auto;
+        }
+
+        .slot-card { 
+            background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 25px; 
+            border: 1px solid #0f3460; text-align: left;
+        }
+
+        /* FORM ELEMENTS */
+        .input-group { position: relative; margin: 15px 0; text-align: left; }
+        input, select { 
+            width: 100%; padding: 12px; border-radius: 8px; border: none; 
+            box-sizing: border-box; background: #f8f9fa; color: #333; 
+        }
+        .eye { position: absolute; right: 12px; top: 10px; cursor: pointer; color: #333; font-size: 18px; }
+
+        /* BUTTONS */
+        button { 
+            padding: 12px 20px; border: none; color: white; cursor: pointer; 
+            border-radius: 8px; font-weight: bold; transition: 0.3s; text-transform: uppercase; 
+        }
+        .btn-auth { background: var(--primary); width: 100%; }
+        .btn-voter-login { background: var(--voter-blue); width: 100%; }
         .btn-green { background: var(--success); }
-        .btn-red { background: #c0392b; }
+        .btn-blue { background: #3498db; }
+        .btn-delete { background: #c0392b; }
+        .btn-reset { background: #8e44ad; }
+        .btn-vote { background: var(--success); width: 100%; margin-bottom: 10px; }
+        .btn-vote:hover { transform: scale(1.02); background: #2ecc71; }
+
         .hidden { display: none; }
-        .status-tag { font-size: 12px; padding: 2px 8px; border-radius: 4px; margin-left: 10px; }
-        .voted { background: #c0392b; }
-        .pending { background: var(--success); }
+        .sub-section { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px dashed #444; }
+        #timer { font-size: 24px; color: var(--accent); font-weight: bold; margin: 15px 0; text-align: center; }
+        .result-box { background: #0f3460; padding: 20px; border-radius: 8px; border-left: 5px solid var(--success); margin-top: 15px; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <nav>
-    <button class="nav-btn active" onclick="showTab('voterTab')">🗳️ Voter Login</button>
+    <button class="nav-btn active" onclick="showTab('voterTab')">🗳️ Voter Portal</button>
     <button class="nav-btn" onclick="showTab('adminTab')">🏛️ Admin Panel</button>
+    <button class="nav-btn" onclick="showTab('settingsTab')">⚙️ Security</button>
 </nav>
 
-<div class="container">
-    <div id="voterTab" class="tab-content">
-        <div class="card" id="loginBox">
-            <h2>Voter Login</h2>
-            <input type="text" id="vID" placeholder="Enter Voter ID">
-            <input type="password" id="vPW" placeholder="Enter Password">
-            <button class="btn-blue" onclick="login()">Enter Election</button>
+<div id="voterTab" class="page-content active">
+    <div class="card" id="loginBox">
+        <h2 style="color: var(--voter-blue)">Voter Login</h2>
+        <div class="input-group"><input type="text" id="vID" placeholder="Voter ID"></div>
+        <div class="input-group">
+            <input type="password" id="vPW" placeholder="Password">
+            <span class="eye" onclick="togglePass('vPW')">👁️</span>
         </div>
-
-        <div class="card hidden" id="voteBox">
-            <h2>Welcome, <span id="userDisplay"></span></h2>
-            <p>Please select a candidate to cast your vote:</p>
-            <div id="btnContainer"></div>
-        </div>
+        <button class="btn-voter-login" onclick="login()">Enter Election</button>
     </div>
 
-    <div id="adminTab" class="tab-content hidden">
-        <h1>Admin Control</h1>
-        
-        <div class="card">
-            <h3>👥 Manage Voters (Add/Edit/Remove)</h3>
-            <div class="card" style="background: rgba(0,0,0,0.2);">
-                <h4>Add New</h4>
-                <input type="text" id="vAddId" placeholder="New Voter ID">
-                <input type="password" id="vAddPass" placeholder="New Password">
-                <button class="btn-green" onclick="addVoter()">Add Voter</button>
+    <div class="card hidden" id="voteBox">
+        <h2 style="color: var(--success)">Cast Your Vote</h2>
+        <p>Voter ID: <b id="userDisplay"></b></p>
+        <div id="btnContainer"></div>
+    </div>
+</div>
+
+<div id="adminTab" class="page-content">
+    <div class="container">
+        <h1 style="text-align: center; color: var(--primary)">Admin Control Center</h1>
+
+        <div class="slot-card">
+            <h3>Slot 1: Counting & Results</h3>
+            <div id="lock1">
+                <input type="text" id="id1" placeholder="Admin ID" style="margin-bottom: 10px;">
+                <div class="input-group">
+                    <input type="password" id="pass1" placeholder="Password">
+                    <span class="eye" onclick="togglePass('pass1')">👁️</span>
+                </div>
+                <button class="btn-auth" onclick="unlock(1)">Unlock Slot 1</button>
             </div>
-            
-            <div class="card" style="background: rgba(0,0,0,0.2);">
-                <h4>Existing Voters</h4>
-                <select id="voterSelect"></select>
-                <input type="password" id="vEditPass" placeholder="New Password for Selected">
-                <button class="btn-blue" onclick="editVoter()">Update Password</button>
-                <button class="btn-red" onclick="removeVoter()">Delete Selected Voter</button>
+            <div id="content1" class="hidden">
+                <button class="btn-blue" onclick="startTimer()">Start 60s Counting</button>
+                <button class="btn-reset" onclick="resetElection()">Reset Round</button>
+                <div id="timer"></div>
+                <div id="finalResult" class="hidden result-box"></div>
             </div>
         </div>
 
-        <div class="card">
-            <h3>🏆 Manage Candidates</h3>
-            <input type="text" id="newCName" placeholder="Candidate Name">
-            <button class="btn-green" onclick="addCandidate()">Add Candidate</button>
-            <hr>
-            <select id="editCSelect"></select>
-            <button class="btn-red" onclick="removeCandidate()">Delete Selected Candidate</button>
+        <div class="slot-card">
+            <h3>Slot 2: Voter Management</h3>
+            <div id="lock2">
+                <input type="text" id="id2" placeholder="Admin ID" style="margin-bottom: 10px;">
+                <div class="input-group">
+                    <input type="password" id="pass2" placeholder="Password">
+                    <span class="eye" onclick="togglePass('pass2')">👁️</span>
+                </div>
+                <button class="btn-auth" onclick="unlock(2)">Unlock Slot 2</button>
+            </div>
+            <div id="content2" class="hidden">
+                <div class="sub-section">
+                    <h4>➕ Add New Voter</h4>
+                    <input type="text" id="vAddId" placeholder="Voter ID" style="margin-bottom: 10px;">
+                    <input type="password" id="vAddPass" placeholder="Password">
+                    <button class="btn-green" onclick="addVoter()" style="margin-top:10px">Add Voter</button>
+                </div>
+                <div class="sub-section">
+                    <h4>✏️ Edit / 🗑️ Remove</h4>
+                    <select id="voterSelect" style="margin-bottom:10px"></select>
+                    <input type="password" id="vEditPass" placeholder="New Password">
+                    <button class="btn-blue" onclick="editVoter()" style="margin-top:10px">Update</button>
+                    <button class="btn-delete" onclick="removeVoter()">Remove</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slot-card">
+            <h3>Slot 3: Candidate Management</h3>
+            <div id="lock3">
+                <input type="text" id="id3" placeholder="Admin ID" style="margin-bottom: 10px;">
+                <div class="input-group">
+                    <input type="password" id="pass3" placeholder="Password">
+                    <span class="eye" onclick="togglePass('pass3')">👁️</span>
+                </div>
+                <button class="btn-auth" onclick="unlock(3)">Unlock Slot 3</button>
+            </div>
+            <div id="content3" class="hidden">
+                <div class="sub-section">
+                    <h4>➕ Add Candidate</h4>
+                    <input type="text" id="newCName" placeholder="Candidate Name">
+                    <button class="btn-green" onclick="addCandidate()" style="margin-top:10px">Add</button>
+                </div>
+                <div class="sub-section">
+                    <h4>✏️ Edit / 🗑️ Remove</h4>
+                    <select id="editCSelect" style="margin-bottom:10px"></select>
+                    <input type="text" id="editCName" placeholder="New Name">
+                    <button class="btn-blue" onclick="editCandidate()" style="margin-top:10px">Update</button>
+                    <button class="btn-delete" onclick="removeCandidate()">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="settingsTab" class="page-content">
+    <div class="card">
+        <h2>Admin Security</h2>
+        <div id="verifyStep">
+            <p>Verify Current Identity:</p>
+            <div class="input-group"><input type="text" id="prevId" placeholder="Current ID"></div>
+            <div class="input-group">
+                <input type="password" id="prevPass" placeholder="Current Password">
+                <span class="eye" onclick="togglePass('prevPass')">👁️</span>
+            </div>
+            <button class="btn-blue" style="width:100%" onclick="verifyCurrent()">Verify</button>
+        </div>
+        <div id="changeStep" class="hidden">
+            <p style="color: var(--success);">Verification Successful!</p>
+            <div class="input-group"><input type="text" id="newId" placeholder="Enter New ID"></div>
+            <div class="input-group"><input type="password" id="newPass" placeholder="Enter New Password"></div>
+            <button class="btn-green" style="width:100%" onclick="updateCredentials()">Apply Changes</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- DATA INITIALIZATION ---
-    // This creates "Default" data so it's not empty on GitHub the first time
-    function initData() {
-        if (!localStorage.getItem('voters')) {
-            const defaultVoters = [{id: "voter1", pass: "123", hasVoted: false}];
-            localStorage.setItem('voters', JSON.stringify(defaultVoters));
-        }
-        if (!localStorage.getItem('candidates')) {
-            const defaultCands = ["Candidate A", "Candidate B"];
-            localStorage.setItem('candidates', JSON.stringify(defaultCands));
-        }
-        updateDropdowns();
-    }
-
-    // --- NAVIGATION ---
+    /* --- UTILITIES --- */
     function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.remove('hidden');
+        document.getElementById(tabId).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
-    // --- DYNAMIC UPDATES ---
-    function updateDropdowns() {
-        const voters = JSON.parse(localStorage.getItem('voters')) || [];
-        const cands = JSON.parse(localStorage.getItem('candidates')) || [];
-        
-        // Update Voter Dropdown
-        const vSelect = document.getElementById('voterSelect');
-        vSelect.innerHTML = voters.map(v => 
-            `<option value="${v.id}">${v.id} (${v.hasVoted ? 'Voted' : 'Ready'})</option>`
-        ).join('');
-
-        // Update Candidate Dropdown
-        const cSelect = document.getElementById('editCSelect');
-        cSelect.innerHTML = cands.map(c => `<option value="${c}">${c}</option>`).join('');
+    function togglePass(id) {
+        const x = document.getElementById(id);
+        x.type = x.type === "password" ? "text" : "password";
     }
 
-    // --- VOTER ACTIONS ---
+    function getAdminCreds() {
+        const saved = localStorage.getItem('adminMainCreds');
+        return saved ? JSON.parse(saved) : { id: "sitams143", pass: "election143" };
+    }
+
+    /* --- VOTER LOGIC --- */
     function login() {
         const id = document.getElementById('vID').value;
         const pw = document.getElementById('vPW').value;
-        const voters = JSON.parse(localStorage.getItem('voters'));
-        const user = voters.find(v => v.id === id && v.pass === pw);
+        const voters = JSON.parse(localStorage.getItem('voters')) || [];
+        const voter = voters.find(v => v.id === id && v.pass === pw);
 
-        if(!user) return alert("Wrong ID or Password!");
-        if(user.hasVoted) return alert("You have already voted!");
+        if(!voter) return alert("Invalid credentials!");
+        if(voter.hasVoted) return alert("You already voted!");
 
         document.getElementById('loginBox').classList.add('hidden');
         document.getElementById('voteBox').classList.remove('hidden');
         document.getElementById('userDisplay').innerText = id;
-        loadVoteButtons(id);
+        loadCandidates(id);
     }
 
-    function loadVoteButtons(voterId) {
+    function loadCandidates(voterId) {
         const container = document.getElementById('btnContainer');
-        const cands = JSON.parse(localStorage.getItem('candidates'));
+        const cands = JSON.parse(localStorage.getItem('candidates')) || ["Candidate A", "Candidate B"];
         container.innerHTML = "";
         cands.forEach(c => {
             const b = document.createElement('button');
-            b.className = "btn-green";
+            b.className = "btn-vote";
             b.innerText = "Vote for " + c;
-            b.onclick = () => castVote(voterId, c);
+            b.onclick = () => cast(voterId, c);
             container.appendChild(b);
         });
     }
 
-    function castVote(vId, cName) {
-        if(!confirm("Confirm vote for " + cName + "?")) return;
+    function cast(voterId, name) {
+        if(!confirm("Vote for " + name + "?")) return;
         let voters = JSON.parse(localStorage.getItem('voters'));
-        let idx = voters.findIndex(v => v.id === vId);
-        voters[idx].hasVoted = true;
+        let votes = JSON.parse(localStorage.getItem('votes')) || {};
+        votes[name] = (votes[name] || 0) + 1;
+        const vIdx = voters.findIndex(v => v.id === voterId);
+        voters[vIdx].hasVoted = true;
         localStorage.setItem('voters', JSON.stringify(voters));
-        alert("Success! Thank you for voting.");
+        localStorage.setItem('votes', JSON.stringify(votes));
+        alert("Vote successful!");
         location.reload();
     }
 
-    // --- ADMIN ACTIONS (DYNAMIC) ---
+    /* --- ADMIN LOGIC --- */
+    function unlock(num) {
+        const idInput = document.getElementById(`id${num}`).value;
+        const passInput = document.getElementById(`pass${num}`).value;
+        const adminCreds = getAdminCreds();
+
+        if(idInput === adminCreds.id && passInput === adminCreds.pass) {
+            document.getElementById(`lock${num}`).classList.add('hidden');
+            document.getElementById(`content${num}`).classList.remove('hidden');
+            if(num === 2) updateVoterDropdown();
+            if(num === 3) updateCandidateDropdown();
+        } else { alert("Access Denied!"); }
+    }
+
+    function startTimer() {
+        let sec = 60;
+        const t = document.getElementById('timer');
+        document.getElementById('finalResult').classList.add('hidden');
+        const timer = setInterval(() => {
+            t.innerText = `Securing Results: ${sec}s`;
+            if(sec-- <= 0) {
+                clearInterval(timer);
+                t.innerText = "Counting Finished!";
+                showResults();
+            }
+        }, 1000);
+    }
+
+    function showResults() {
+        const votes = JSON.parse(localStorage.getItem('votes')) || {};
+        const res = document.getElementById('finalResult');
+        res.classList.remove('hidden');
+        let output = "<b>📊 OFFICIAL VOTE TALLY:</b><br><hr>";
+        let maxVotes = -1; let winners = [];
+
+        for (let name in votes) {
+            let count = votes[name];
+            output += `${name}: ${count} votes<br>`;
+            if (count > maxVotes) { maxVotes = count; winners = [name]; }
+            else if (count === maxVotes && maxVotes > 0) { winners.push(name); }
+        }
+        output += "<hr>";
+        if (maxVotes <= 0) output += "No votes cast.";
+        else if (winners.length === 1) output += `WINNER: 👑 ${winners[0]}`;
+        else output += `TIE: ${winners.join(" & ")}`;
+        res.innerHTML = output;
+    }
+
+    function resetElection() {
+        if(!confirm("Reset all?")) return;
+        let cands = JSON.parse(localStorage.getItem('candidates')) || [];
+        let resetVotes = {}; cands.forEach(c => resetVotes[c] = 0);
+        localStorage.setItem('votes', JSON.stringify(resetVotes));
+        let voters = JSON.parse(localStorage.getItem('voters')) || [];
+        voters.forEach(v => v.hasVoted = false);
+        localStorage.setItem('voters', JSON.stringify(voters));
+        alert("System Reset!");
+    }
+
+    /* --- VOTER/CANDIDATE MGMT --- */
     function addVoter() {
-        const id = document.getElementById('vAddId').value;
-        const pass = document.getElementById('vAddPass').value;
-        if(!id || !pass) return alert("Enter both ID and Pass");
-        
-        let voters = JSON.parse(localStorage.getItem('voters'));
-        voters.push({id: id, pass: pass, hasVoted: false});
+        const id = document.getElementById('vAddId').value.trim();
+        const pass = document.getElementById('vAddPass').value.trim();
+        if(!id || !pass) return;
+        let voters = JSON.parse(localStorage.getItem('voters')) || [];
+        voters.push({id, pass, hasVoted: false});
         localStorage.setItem('voters', JSON.stringify(voters));
-        updateDropdowns();
-        alert("Voter " + id + " Added!");
+        updateVoterDropdown();
+        alert("Added!");
     }
 
-    function removeVoter() {
-        const id = document.getElementById('voterSelect').value;
-        let voters = JSON.parse(localStorage.getItem('voters'));
-        voters = voters.filter(v => v.id !== id);
-        localStorage.setItem('voters', JSON.stringify(voters));
-        updateDropdowns();
-        alert("Voter Removed.");
-    }
-
-    function editVoter() {
-        const id = document.getElementById('voterSelect').value;
-        const newPass = document.getElementById('vEditPass').value;
-        if(!newPass) return alert("Enter new password");
-        
-        let voters = JSON.parse(localStorage.getItem('voters'));
-        let idx = voters.findIndex(v => v.id === id);
-        voters[idx].pass = newPass;
-        localStorage.setItem('voters', JSON.stringify(voters));
-        alert("Password updated for " + id);
+    function updateVoterDropdown() {
+        const voters = JSON.parse(localStorage.getItem('voters')) || [];
+        document.getElementById('voterSelect').innerHTML = voters.map(v => `<option value="${v.id}">${v.id}</option>`).join('');
     }
 
     function addCandidate() {
-        const name = document.getElementById('newCName').value;
+        const name = document.getElementById('newCName').value.trim();
         if(!name) return;
-        let cands = JSON.parse(localStorage.getItem('candidates'));
+        let cands = JSON.parse(localStorage.getItem('candidates')) || [];
         cands.push(name);
         localStorage.setItem('candidates', JSON.stringify(cands));
-        updateDropdowns();
-        alert("Candidate Added!");
+        updateCandidateDropdown();
+        alert("Added!");
     }
 
-    function removeCandidate() {
-        const name = document.getElementById('editCSelect').value;
-        let cands = JSON.parse(localStorage.getItem('candidates'));
-        cands = cands.filter(c => c !== name);
-        localStorage.setItem('candidates', JSON.stringify(cands));
-        updateDropdowns();
-        alert("Candidate Removed.");
+    function updateCandidateDropdown() {
+        const cands = JSON.parse(localStorage.getItem('candidates')) || [];
+        document.getElementById('editCSelect').innerHTML = cands.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
-    // Start everything
-    initData();
+    /* --- SECURITY SETTINGS --- */
+    function verifyCurrent() {
+        const current = getAdminCreds();
+        const inputId = document.getElementById('prevId').value;
+        const inputPass = document.getElementById('prevPass').value;
+        if (inputId === current.id && inputPass === current.pass) {
+            document.getElementById('verifyStep').classList.add('hidden');
+            document.getElementById('changeStep').classList.remove('hidden');
+        } else { alert("Failed!"); }
+    }
+
+    function updateCredentials() {
+        const newId = document.getElementById('newId').value.trim();
+        const newPass = document.getElementById('newPass').value.trim();
+        localStorage.setItem('adminMainCreds', JSON.stringify({ id: newId, pass: newPass }));
+        alert("Updated!");
+        location.reload();
+    }
 </script>
-
 </body>
 </html>
